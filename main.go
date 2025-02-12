@@ -38,7 +38,7 @@ func postLearner(c *gin.Context) {
 func getLearnerByID(c *gin.Context) {
 	strId := c.Param("id")
 
-	id, err := strconv.Atoi(strId) // conv to id to int because Param() returns a string by default
+	id, err := strconv.Atoi(strId) // convert id to int because Param() returns a string by default
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "invalid id format"})
 		return
