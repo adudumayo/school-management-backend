@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -25,5 +24,8 @@ func getLearners(c *gin.Context) {
 }
 
 func main() {
-	fmt.Println("vim-go")
+	router := gin.Default()
+	router.GET("/learners", getLearners)
+
+	router.Run("localhost:8080")
 }
