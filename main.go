@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,6 +33,25 @@ func postLearner(c *gin.Context) {
 
 	learners = append(learners, newLearner)
 	c.IndentedJSON(http.StatusCreated, newLearner)
+}
+
+func getLearnerByID(c *gin.Context) {
+	strId := c.Param("id")
+
+	id, err := strconv.Atoi(strId) // conv to id to int because Param() returns a string by default
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "invalid id format"})
+		return
+	}
+
+	for _, currLearner := range learners {
+		if currLearner.ID == id {
+			c.IndentedJSON(http.StatusOK, currLearner)
+			return
+		}
+	}
+
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "learner not found"})
 }
 
 func main() {
