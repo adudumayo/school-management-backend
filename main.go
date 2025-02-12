@@ -23,6 +23,17 @@ func getLearners(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, learners)
 }
 
+func postLearner(c *gin.Context) {
+	var newLearner learner
+
+	if err := c.BindJSON(&newLearner); err != nil {
+		return
+	}
+
+	learners = append(learners, newLearner)
+	c.IndentedJSON(http.StatusCreated, newLearner)
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/learners", getLearners)
