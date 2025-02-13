@@ -54,6 +54,26 @@ func getLearnerByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "learner not found"})
 }
 
+func removeLearnerByID(c *gin.Context) {
+	strId := c.Param("id")
+
+	id, err := strconv.Atoi(strId)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "invalid id format"})
+		return
+	}
+
+	for pos, currLearner := range learners {
+		if currLearner.ID == id {
+			learners = append(learners[:pos], learners[pos+1:]...)
+			c.IndentedJSON(http.StatusOK, learners)
+			return
+		}
+	}
+
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "learner does not exist"})
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/learners", getLearners)
