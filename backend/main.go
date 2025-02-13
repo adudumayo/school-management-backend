@@ -79,6 +79,7 @@ func main() {
 	router.GET("/learners", getLearners)
 	router.POST("learners", postLearner)
 	router.GET("/learners/:id", getLearnerByID)
+	router.DELETE("/learners/:id", removeLearnerByID)
 
 	router.Run("localhost:8080")
 }
