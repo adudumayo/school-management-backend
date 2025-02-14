@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -76,6 +77,7 @@ func removeLearnerByID(c *gin.Context) {
 
 func main() {
 	router := gin.Default()
+	router.Use(cors.Default())
 	router.GET("/learners", getLearners)
 	router.POST("learners", postLearner)
 	router.GET("/learners/:id", getLearnerByID)
