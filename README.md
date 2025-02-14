@@ -1,1 +1,1 @@
-# school-management-system
+# school-management-backend
