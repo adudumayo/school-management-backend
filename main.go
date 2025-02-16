@@ -1,12 +1,15 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	//"github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type learner struct {
@@ -76,7 +79,32 @@ func removeLearnerByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "learner does not exist"})
 }
 
+var db *sql.DB
+
 func main() {
+	// Capture connection properties.
+	/*connProps := mysql.Config{
+		User:   os.Getenv("DBUSER"),
+		Passwd: os.Getenv("DBPASS"),
+		Net:    "tcp",
+		Addr:   "127.0.0.1:3306",
+		DBName: "myschool",
+	}*/
+	// Get a database handle.
+	var err error
+	//db, err = sql.Open("mysql", connProps.FormatDSN())
+	db, err := sql.Open("mysql", "root:Admin@/myschool")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pingErr := db.Ping()
+	if pingErr != nil {
+		log.Fatal(pingErr)
+	}
+
+	fmt.Println("Connected to the database!!")
+
 	router := gin.Default()
 	router.Use(cors.Default())
 	router.GET("/learners", getLearners)
