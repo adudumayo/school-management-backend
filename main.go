@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gin-contrib/cors"
@@ -12,128 +13,137 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type learner struct {
+// Learner model
+type Learner struct {
 	ID      int     `json:"id"`
 	Name    string  `json:"name"`
 	Class   int     `json:"class"`
 	Average float64 `json:"average"`
 }
 
-var learners = []learner{
-	{ID: 1, Name: "Learner One", Class: 8, Average: 34.66},
-	{ID: 2, Name: "Learner Two", Class: 10, Average: 60.89},
-	{ID: 3, Name: "Learner Three", Class: 9, Average: 79.23},
+var db *sql.DB
+
+// Connect to MySQL database
+func connectDB() {
+	var err error
+	dbUser := os.Getenv("DBUSER")
+	dbPass := os.Getenv("DBPASS")
+	dbName := os.Getenv("DBNAME")
+	dbHost := os.Getenv("DBHOST")
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", dbUser, dbPass, dbHost, dbName)
+	db, err = sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatal("Database connection failed:", err)
+	}
+
+	if err = db.Ping(); err != nil {
+		log.Fatal("Database unreachable:", err)
+	}
+
+	fmt.Println("🔥 Connected to the database!")
 }
 
+// Get all learners
 func getLearners(c *gin.Context) {
-	var dbLearners []learner
-
 	rows, err := db.Query("SELECT id, name, class, average FROM learner")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch learners"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch learners"})
 		return
 	}
 	defer rows.Close()
 
+	var learners []Learner
 	for rows.Next() {
-		var dbLearner learner
-		if err := rows.Scan(&dbLearner.ID, &dbLearner.Name, &dbLearner.Class, &dbLearner.Average); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse learners data"})
+		var l Learner
+		if err := rows.Scan(&l.ID, &l.Name, &l.Class, &l.Average); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error parsing learner data"})
 			return
 		}
-		dbLearners = append(dbLearners, dbLearner)
+		learners = append(learners, l)
 	}
 
-	if err := rows.Err(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "error reading learners data"})
-		return
-	}
-
-	c.JSON(http.StatusOK, dbLearners)
+	c.JSON(http.StatusOK, learners)
 }
 
+// Add a new learner
 func postLearner(c *gin.Context) {
-	var newLearner learner
-
+	var newLearner Learner
 	if err := c.BindJSON(&newLearner); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
-	learners = append(learners, newLearner)
-	c.IndentedJSON(http.StatusCreated, newLearner)
+	result, err := db.Exec("INSERT INTO learner (name, class, average) VALUES (?, ?, ?)",
+		newLearner.Name, newLearner.Class, newLearner.Average)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert learner"})
+		return
+	}
+
+	id, _ := result.LastInsertId()
+	newLearner.ID = int(id)
+	c.JSON(http.StatusCreated, newLearner)
 }
 
+// Get a learner by ID
 func getLearnerByID(c *gin.Context) {
-	strId := c.Param("id")
-
-	id, err := strconv.Atoi(strId) // convert id to int because Param() returns a string by default
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "invalid id format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
 
-	for _, currLearner := range learners {
-		if currLearner.ID == id {
-			c.IndentedJSON(http.StatusOK, currLearner)
-			return
+	var l Learner
+	err = db.QueryRow("SELECT id, name, class, average FROM learner WHERE id = ?", id).
+		Scan(&l.ID, &l.Name, &l.Class, &l.Average)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"message": "Learner not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		}
+		return
 	}
 
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "learner not found"})
+	c.JSON(http.StatusOK, l)
 }
 
+// Delete a learner by ID
 func removeLearnerByID(c *gin.Context) {
-	strId := c.Param("id")
-
-	id, err := strconv.Atoi(strId)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "invalid id format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
 
-	for pos, currLearner := range learners {
-		if currLearner.ID == id {
-			learners = append(learners[:pos], learners[pos+1:]...)
-			c.IndentedJSON(http.StatusOK, learners)
-			return
-		}
+	res, err := db.Exec("DELETE FROM learner WHERE id = ?", id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete learner"})
+		return
 	}
 
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "learner does not exist"})
+	rowsAffected, _ := res.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Learner not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Learner deleted"})
 }
 
-var db *sql.DB
-
+// Main function
 func main() {
-	// Capture connection properties.
-	/*connProps := mysql.Config{
-		User:   os.Getenv("DBUSER"),
-		Passwd: os.Getenv("DBPASS"),
-		Net:    "tcp",
-		Addr:   "127.0.0.1:3306",
-		DBName: "myschool",
-	}*/
-	// Get a database handle.
-	var err error
-	//db, err = sql.Open("mysql", connProps.FormatDSN())
-	db, err := sql.Open("mysql", "root:Admin@/myschool")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	pingErr := db.Ping()
-	if pingErr != nil {
-		log.Fatal(pingErr)
-	}
-
-	fmt.Println("Connected to the database!!")
+	connectDB()
 
 	router := gin.Default()
 	router.Use(cors.Default())
+
 	router.GET("/learners", getLearners)
-	router.POST("learners", postLearner)
+	router.POST("/learners", postLearner)
 	router.GET("/learners/:id", getLearnerByID)
 	router.DELETE("/learners/:id", removeLearnerByID)
 
-	router.Run("localhost:8080")
+	fmt.Println("🚀 Server running on http://localhost:8080")
+	router.Run(":8080")
 }
