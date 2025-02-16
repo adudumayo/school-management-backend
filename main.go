@@ -26,7 +26,31 @@ var learners = []learner{
 }
 
 func getLearners(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, learners)
+	var dbLearners []learner
+
+	rows, err := db.Query("SELECT * FROM learner")
+	if err != nil {
+		fmt.Println("Error with getting from learner table")
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var dbLearner learner
+
+		if err := rows.Scan(&dbLearner.ID, &dbLearner.Name, &dbLearner.Class, &dbLearner.Average); err != nil {
+			fmt.Println("Error with scanning the returned rows of learners")
+			return
+		}
+		dbLearners = append(dbLearners, dbLearner)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Println("Final checks Error")
+		return
+	}
+	c.IndentedJSON(http.StatusOK, dbLearners)
 }
 
 func postLearner(c *gin.Context) {
