@@ -28,29 +28,28 @@ var learners = []learner{
 func getLearners(c *gin.Context) {
 	var dbLearners []learner
 
-	rows, err := db.Query("SELECT * FROM learner")
+	rows, err := db.Query("SELECT id, name, class, average FROM learner")
 	if err != nil {
-		fmt.Println("Error with getting from learner table")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch learners"})
 		return
 	}
-
 	defer rows.Close()
 
 	for rows.Next() {
 		var dbLearner learner
-
 		if err := rows.Scan(&dbLearner.ID, &dbLearner.Name, &dbLearner.Class, &dbLearner.Average); err != nil {
-			fmt.Println("Error with scanning the returned rows of learners")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse learners data"})
 			return
 		}
 		dbLearners = append(dbLearners, dbLearner)
 	}
 
 	if err := rows.Err(); err != nil {
-		fmt.Println("Final checks Error")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error reading learners data"})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, dbLearners)
+
+	c.JSON(http.StatusOK, dbLearners)
 }
 
 func postLearner(c *gin.Context) {
