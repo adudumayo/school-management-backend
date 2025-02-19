@@ -41,7 +41,7 @@ func connectDB() {
 		log.Fatal("Database unreachable:", err)
 	}
 
-	fmt.Println("🔥 Connected to the database!")
+	fmt.Println("Connected to the database!")
 }
 
 // Get all learners
@@ -144,6 +144,6 @@ func main() {
 	router.GET("/learners/:id", getLearnerByID)
 	router.DELETE("/learners/:id", removeLearnerByID)
 
-	fmt.Println("🚀 Server running on http://localhost:8080")
+	fmt.Println("Server running on http://localhost:8080")
 	router.Run(":8080")
 }
