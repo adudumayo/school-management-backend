@@ -1,16 +1,16 @@
 package model
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"os"
-	"database/sql"
 )
 
-var db *sql.DB
-
 // Connect to MySQL database
-func connectDB() *sql.DB {
+func ConnectDB() *sql.DB {
 	var err error
+	var db *sql.DB
 	dbUser := os.Getenv("DBUSER")
 	dbPass := os.Getenv("DBPASS")
 	dbName := os.Getenv("DBNAME")
@@ -30,4 +30,3 @@ func connectDB() *sql.DB {
 
 	return db
 }
-
