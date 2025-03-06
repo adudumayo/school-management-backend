@@ -7,20 +7,13 @@ import (
 	"strconv"
 
 	"github.com/adudumayo/school-management-backend/model"
+	"github.com/adudumayo/school-management-backend/view"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
-
-// Learner model
-type Learner struct {
-	ID      int     `json:"id"`
-	Name    string  `json:"name"`
-	Class   int     `json:"class"`
-	Average float64 `json:"average"`
-}
 
 // Get all learners
 func getLearners(c *gin.Context) {
@@ -31,9 +24,9 @@ func getLearners(c *gin.Context) {
 	}
 	defer rows.Close()
 
-	var learners []Learner
+	var learners []view.Learner
 	for rows.Next() {
-		var l Learner
+		var l view.Learner
 		if err := rows.Scan(&l.ID, &l.Name, &l.Class, &l.Average); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error parsing learner data"})
 			return
@@ -46,7 +39,7 @@ func getLearners(c *gin.Context) {
 
 // Add a new learner
 func postLearner(c *gin.Context) {
-	var newLearner Learner
+	var newLearner view.Learner
 	if err := c.BindJSON(&newLearner); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
@@ -72,7 +65,7 @@ func getLearnerByID(c *gin.Context) {
 		return
 	}
 
-	var l Learner
+	var l view.Learner
 	err = db.QueryRow("SELECT id, name, class, average FROM learner WHERE id = ?", id).
 		Scan(&l.ID, &l.Name, &l.Class, &l.Average)
 	if err != nil {
