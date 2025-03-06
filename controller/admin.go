@@ -5,16 +5,15 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/adudumayo/school-management-backend/model"
 	"github.com/adudumayo/school-management-backend/view"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var db *sql.DB
-
 // Get all learners
 func GetLearners(c *gin.Context) {
-	rows, err := db.Query("SELECT id, name, class, average FROM learner")
+	rows, err := model.DB.Query("SELECT id, name, class, average FROM learner")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch learners"})
 		return
@@ -42,7 +41,7 @@ func PostLearner(c *gin.Context) {
 		return
 	}
 
-	result, err := db.Exec("INSERT INTO learner (name, class, average) VALUES (?, ?, ?)",
+	result, err := model.DB.Exec("INSERT INTO learner (name, class, average) VALUES (?, ?, ?)",
 		newLearner.Name, newLearner.Class, newLearner.Average)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert learner"})
@@ -63,7 +62,7 @@ func GetLearnerByID(c *gin.Context) {
 	}
 
 	var l view.Learner
-	err = db.QueryRow("SELECT id, name, class, average FROM learner WHERE id = ?", id).
+	err = model.DB.QueryRow("SELECT id, name, class, average FROM learner WHERE id = ?", id).
 		Scan(&l.ID, &l.Name, &l.Class, &l.Average)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -85,7 +84,7 @@ func RemoveLearnerByID(c *gin.Context) {
 		return
 	}
 
-	res, err := db.Exec("DELETE FROM learner WHERE id = ?", id)
+	res, err := model.DB.Exec("DELETE FROM learner WHERE id = ?", id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete learner"})
 		return

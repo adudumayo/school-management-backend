@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 
@@ -13,9 +12,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var db *sql.DB
-
-// Main function
 func main() {
 	// Load .env file
 	err := godotenv.Load()
@@ -23,7 +19,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	db = model.ConnectDB()
+	model.ConnectDB()
 
 	router := gin.Default()
 	router.Use(cors.Default())

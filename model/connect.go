@@ -7,10 +7,11 @@ import (
 	"os"
 )
 
+var DB *sql.DB
+
 // Connect to MySQL database
-func ConnectDB() *sql.DB {
+func ConnectDB() {
 	var err error
-	var DB *sql.DB
 	dbUser := os.Getenv("DBUSER")
 	dbPass := os.Getenv("DBPASS")
 	dbName := os.Getenv("DBNAME")
@@ -27,6 +28,4 @@ func ConnectDB() *sql.DB {
 	}
 
 	fmt.Println("Connected to the database!")
-
-	return db
 }
