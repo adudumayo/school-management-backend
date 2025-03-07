@@ -30,6 +30,9 @@ func main() {
 	router.GET("/learners/:id", controller.GetLearnerByID)
 	router.DELETE("/learners/:id", controller.RemoveLearnerByID)
 
+	// teacher endpoints
+	router.GET("/quizzes", controller.GetQuizzes)
+
 	fmt.Println("Server running on http://localhost:8080")
 	router.Run(":8080")
 }
