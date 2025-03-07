@@ -26,12 +26,13 @@ func main() {
 
 	// admin endpoints
 	router.GET("/learners", controller.GetLearners)
-	router.POST("/learners", controller.PostLearner)
 	router.GET("/learners/:id", controller.GetLearnerByID)
+	router.POST("/learners", controller.PostLearner)
 	router.DELETE("/learners/:id", controller.RemoveLearnerByID)
 
 	// teacher endpoints
 	router.GET("/quizzes", controller.GetQuizzes)
+	router.POST("/quizzes", controller.PostQuiz)
 
 	fmt.Println("Server running on http://localhost:8080")
 	router.Run(":8080")
