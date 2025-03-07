@@ -30,3 +30,23 @@ func GetQuizzes(c *gin.Context) {
 
 	c.JSON(http.StatusOK, quizzes)
 }
+
+// Add a new quiz
+func PostQuiz(c *gin.Context) {
+	var newQuiz view.Quiz
+	if err := c.BindJSON(&newQuiz); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	result, err := model.DB.Exec("INSERT INTO quiz (subject, topic, question, due_date) VALUES (?, ?, ?, ?)",
+		newQuiz.Subject, newQuiz.Topic, newQuiz.Question, newQuiz.Due_date)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert quiz"})
+		return
+	}
+
+	id, _ := result.LastInsertId()
+	newQuiz.ID = int(id)
+	c.JSON(http.StatusCreated, newQuiz)
+}
