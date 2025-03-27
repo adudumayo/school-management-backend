@@ -77,7 +77,7 @@ func GetLearnerByID(c *gin.Context) {
 }
 
 // Delete a learner by ID
-func RemoveLearnerByID(c *gin.Context) {
+func DeleteLearnerByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})

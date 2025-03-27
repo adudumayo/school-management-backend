@@ -28,7 +28,7 @@ func main() {
 	router.GET("/learners", controller.GetLearners)
 	router.GET("/learners/:id", controller.GetLearnerByID)
 	router.POST("/learners", controller.PostLearner)
-	router.DELETE("/learners/:id", controller.RemoveLearnerByID)
+	router.DELETE("/learners/:id", controller.DeleteLearnerByID)
 
 	// teacher endpoints
 	router.GET("/quizzes", controller.GetQuizzes)
