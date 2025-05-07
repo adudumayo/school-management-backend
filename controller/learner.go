@@ -1,14 +1,10 @@
 package controller
 
 import (
-	"net/http"
-
-	"github.com/adudumayo/school-management-backend/model"
-	"github.com/adudumayo/school-management-backend/view"
-	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
 
+/*
 // Get all quizzes
 func GetQuizzes(c *gin.Context) {
 	rows, err := model.DB.Query("SELECT id, subject, topic, question, due_date FROM quiz")
@@ -30,3 +26,4 @@ func GetQuizzes(c *gin.Context) {
 
 	c.JSON(http.StatusOK, quizzes)
 }
+*/
