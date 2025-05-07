@@ -30,6 +30,9 @@ func main() {
 	router.POST("/learners", controller.PostLearner)
 	router.DELETE("/learners/:id", controller.DeleteLearnerByID)
 
+	// admin teacher related endpoints
+	route.POST("/teachers", controller.PostTeacher)
+
 	// teacher endpoints
 	router.GET("/quizzes", controller.GetQuizzes)
 	router.POST("/quizzes", controller.PostQuiz)

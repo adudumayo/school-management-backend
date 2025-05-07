@@ -98,3 +98,23 @@ func DeleteLearnerByID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Learner deleted"})
 }
+
+// Add a new teacher
+func PostTeacher(c *gin.Context) {
+	var newTeacher view.Teacher
+	if err := c.BindJSON(&newTeacher); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	result, err := model.DB.Exec("INSERT INTO teacher (surname, username, title, password) VALUES (?, ?, ?, ?)",
+		newTeacher.Surname, newTeacher.Username, newTeacher.Title, newTeacher.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert learner"})
+		return
+	}
+
+	id, _ := result.LastInsertId()
+	newTeacher.ID = int(id)
+	c.JSON(http.StatusCreated, newTeacher)
+}
