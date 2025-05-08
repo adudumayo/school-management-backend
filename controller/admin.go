@@ -99,6 +99,10 @@ func DeleteLearnerByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Learner deleted"})
 }
 
+/*
+The following is the teacher admin related stuff
+*/
+
 // Add a new teacher
 func PostTeacher(c *gin.Context) {
 	var newTeacher view.Teacher
@@ -117,4 +121,29 @@ func PostTeacher(c *gin.Context) {
 	id, _ := result.LastInsertId()
 	newTeacher.ID = int(id)
 	c.JSON(http.StatusCreated, newTeacher)
+}
+
+// Teacher Login in
+func TeacherLogin(c *gin.Context) {
+	username := c.Param("username")
+	password := c.Param("password")
+
+	var loggingTeacher view.Teacher
+	err = model.DB.QueryRow("SELECT password FROM teacher WHERE username = ?", username).
+		Scan(&loggingTeacher.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"message": "Username not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		}
+		return
+	}
+
+	if password != loggingTeacher.Password {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Wrong password, try again"})
+		return
+	}
+
+	c.JSON(http.StatusOK, loggingTeacher)
 }
