@@ -32,6 +32,7 @@ func main() {
 
 	// admin teacher related endpoints
 	router.POST("/teachers", controller.PostTeacher)
+	router.GET("/teacher_login/username/:username/password/:password", controller.TeacherLogin)
 
 	// teacher endpoints
 	router.GET("/quizzes", controller.GetQuizzes)

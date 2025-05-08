@@ -129,7 +129,7 @@ func TeacherLogin(c *gin.Context) {
 	password := c.Param("password")
 
 	var loggingTeacher view.Teacher
-	err = model.DB.QueryRow("SELECT password FROM teacher WHERE username = ?", username).
+	err := model.DB.QueryRow("SELECT password FROM teacher WHERE username = ?", username).
 		Scan(&loggingTeacher.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
