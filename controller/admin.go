@@ -145,5 +145,5 @@ func TeacherLogin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, loggingTeacher)
+	c.JSON(http.StatusOK, "Approved")
 }
