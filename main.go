@@ -38,6 +38,9 @@ func main() {
 	router.GET("/quizzes", controller.GetQuizzes)
 	router.POST("/quizzes", controller.PostQuiz)
 
+	//learner related endpoints
+	//router.GET("/test_end_point", controller.GetLearners)
+
 	fmt.Println("Server running on http://localhost:8080")
 	router.Run(":8080")
 }
