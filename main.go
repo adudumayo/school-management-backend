@@ -35,11 +35,11 @@ func main() {
 	router.GET("/teacher_login/username/:username/password/:password", controller.TeacherLogin)
 
 	// teacher endpoints
-	router.GET("/quizzes", controller.GetQuizzes)
+	//router.GET("/quizzes", controller.GetQuizzes)
 	router.POST("/quizzes", controller.PostQuiz)
 
 	//learner related endpoints
-	//router.GET("/test_end_point", controller.GetLearners)
+	router.GET("/quizzes", controller.GetQuizzes)
 
 	fmt.Println("Server running on http://localhost:8080")
 	router.Run(":8080")
